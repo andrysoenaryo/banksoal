@@ -1,0 +1,23 @@
+{
+    "name": "apps-soal-frontend",
+    "private": true,
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "build:hosting": "vite build --outDir ../backend/public --emptyOutDir false",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "axios": "^1.9.0",
+        "react": "^19.1.0",
+        "react-data-table-component": "^7.7.0",
+        "react-dom": "^19.1.0",
+        "react-icons": "^5.6.0"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-react": "^5.0.1",
+        "vite": "^7.1.7"
+    }
+}
