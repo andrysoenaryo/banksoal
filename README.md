@@ -185,6 +185,25 @@ Model deploy yang direkomendasikan:
 9. Permission folder `storage` dan `bootstrap/cache` sudah writable.
 10. Tes login + refresh route SPA + upload gambar soal sukses.
 
+### Checklist Final Deploy Khusus PHP 8.3
+
+Gunakan checklist ini jika server hosting mentok di PHP 8.3:
+
+1. Pastikan versi runtime web server dan CLI sama-sama PHP 8.3.x.
+2. Pastikan `backend/composer.json` mengandung `config.platform.php=8.3.0`.
+3. Jalankan install dependency backend dengan lock file terbaru:
+	`composer install --no-dev --optimize-autoloader --no-interaction`.
+4. Validasi dependency production:
+	`composer check-platform-reqs --no-dev`.
+5. Jalankan migrasi production dengan force:
+	`php artisan migrate --force`.
+6. Buat cache konfigurasi setelah `.env` final:
+	`php artisan config:cache && php artisan route:cache && php artisan view:cache`.
+7. Build frontend dengan script hosting lalu pastikan hasil build masuk ke `backend/public`.
+8. Verifikasi file inti publik tersedia: `index.php`, `index.html`, dan folder `assets`.
+9. Pastikan permission folder `storage` dan `bootstrap/cache` writable oleh user web server.
+10. Lakukan smoke test live: login, akses halaman internal SPA, upload gambar soal, dan hit endpoint API utama.
+
 ### 1. Persiapan Domain & SSL
 
 - Tambahkan domain `banksoal.appsdraft.com` di panel hosting.
@@ -226,6 +245,7 @@ Catatan:
 
 - Folder `storage` dan `bootstrap/cache` harus writable.
 - Jika ada perubahan `.env`, jalankan `php artisan optimize:clear` lalu cache ulang.
+- Jika mesin lokal memakai PHP lebih tinggi dari server (mis. lokal 8.4, hosting 8.3), pastikan `backend/composer.json` memiliki `config.platform.php=8.3.0` agar `composer.lock` tetap kompatibel dengan hosting.
 
 ### 3. Build Frontend Untuk Hosting
 
