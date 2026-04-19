@@ -7,6 +7,29 @@ export function createOption(index) {
     };
 }
 
+export const MULTIPLE_CHOICE_OPTION_KEYS = ['A', 'B', 'C', 'D', 'E'];
+
+export function createDefaultOptions() {
+    return MULTIPLE_CHOICE_OPTION_KEYS.map((_, index) => createOption(index));
+}
+
+export function normalizeMultipleChoiceOptions(options = []) {
+    const optionMap = new Map(
+        options.map((option) => [String(option.option_key ?? '').toUpperCase(), option]),
+    );
+
+    return MULTIPLE_CHOICE_OPTION_KEYS.map((key, index) => {
+        const existing = optionMap.get(key);
+
+        return {
+            option_key: key,
+            option_text: existing?.option_text ?? '',
+            is_correct: Boolean(existing?.is_correct),
+            sort_order: existing?.sort_order ?? index,
+        };
+    });
+}
+
 export function createQuestionForm() {
     return {
         id: null,
@@ -21,7 +44,7 @@ export function createQuestionForm() {
         explanation: '',
         difficulty_level: 'sedang',
         points: 1,
-        options: [createOption(0), createOption(1), createOption(2), createOption(3)],
+        options: createDefaultOptions(),
     };
 }
 

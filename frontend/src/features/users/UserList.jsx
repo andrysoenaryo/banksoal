@@ -1,11 +1,100 @@
 import { useState } from 'react';
 import AppDataTable from '../../components/AppDataTable';
 import SearchableSelect from '../../components/SearchableSelect';
-import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiEdit2, FiKey, FiTrash2, FiX } from 'react-icons/fi';
 
-export default function UserList({ filters, setFilters, setPage, roles, users, setForm, currentUserId, removeUser, bulkRemoveUsers, canEdit, canDelete, meta, setPerPage, sort, setSort, loading }) {
+const PERMISSION_LABELS = {
+    'dashboard.view': 'Lihat Dashboard',
+    'subjects.view': 'Lihat Mata Pelajaran',
+    'subjects.create': 'Tambah Mata Pelajaran',
+    'subjects.update': 'Edit Mata Pelajaran',
+    'subjects.delete': 'Hapus Mata Pelajaran',
+    'chapters.view': 'Lihat Bab & Sub Bab',
+    'chapters.create': 'Tambah Bab & Sub Bab',
+    'chapters.update': 'Edit Bab & Sub Bab',
+    'chapters.delete': 'Hapus Bab & Sub Bab',
+    'questions.view': 'Lihat Bank Soal',
+    'questions.create': 'Tambah Soal',
+    'questions.import': 'Import Soal',
+    'questions.update': 'Edit Soal',
+    'questions.delete': 'Hapus Soal',
+    'packages.view': 'Lihat Paket Soal',
+    'packages.generate': 'Generate Paket Soal',
+    'packages.update': 'Edit Paket Soal',
+    'packages.export': 'Export Paket Soal',
+    'packages.delete': 'Hapus Paket Soal',
+    'users.view': 'Lihat Daftar User',
+    'users.create': 'Tambah User',
+    'users.update': 'Edit User',
+    'users.delete': 'Hapus User',
+    'roles.view': 'Lihat Role & Permission',
+    'roles.create': 'Tambah Role',
+    'roles.update': 'Edit Role',
+    'roles.delete': 'Hapus Role',
+    'menus.manage': 'Kelola Menu Navigasi',
+};
+
+const PERMISSION_GROUP_LABELS = {
+    dashboard: 'Dashboard',
+    subjects: 'Mata Pelajaran',
+    chapters: 'Bab & Sub Bab',
+    questions: 'Bank Soal',
+    packages: 'Paket Soal',
+    users: 'Manajemen User',
+    roles: 'Role & Permission',
+    menus: 'Menu Navigasi',
+};
+
+function groupPermissions(permissions) {
+    const groups = {};
+    for (const perm of permissions) {
+        const prefix = perm.split('.')[0];
+        if (!groups[prefix]) groups[prefix] = [];
+        groups[prefix].push(perm);
+    }
+    return groups;
+}
+
+function PermissionPopup({ user, onClose }) {
+    const groups = groupPermissions(user.permissions);
+
+    return (
+        <div className="export-choice-overlay" onClick={onClose}>
+            <div className="perm-popup" onClick={(e) => e.stopPropagation()}>
+                <div className="perm-popup-header">
+                    <div>
+                        <p className="eyebrow">Hak Akses</p>
+                        <h3>{user.name}</h3>
+                    </div>
+                    <button type="button" className="ghost-button perm-popup-close" onClick={onClose}><FiX /></button>
+                </div>
+                {user.permissions.length === 0 ? (
+                    <p className="muted" style={{ margin: 0 }}>User ini belum memiliki permission.</p>
+                ) : (
+                    <div className="perm-group-list">
+                        {Object.entries(groups).map(([prefix, perms]) => (
+                            <div key={prefix} className="perm-group">
+                                <p className="perm-group-title">{PERMISSION_GROUP_LABELS[prefix] ?? prefix}</p>
+                                <div className="perm-item-list">
+                                    {perms.map((perm) => (
+                                        <span key={perm} className="perm-item">
+                                            {PERMISSION_LABELS[perm] ?? perm}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default function UserList({ filters, setFilters, setPage, roles, users, setForm, currentUserId, removeUser, bulkRemoveUsers, resetUserPassword, canEdit, canDelete, canResetPassword, meta, setPerPage, sort, setSort, loading }) {
     const [selectedRows, setSelectedRows] = useState([]);
     const [toggleClear, setToggleClear] = useState(false);
+    const [permPopupUser, setPermPopupUser] = useState(null);
 
     function handleSort(column, direction) {
         setSort({ sortBy: column.sortField ?? '', sortDir: direction });
@@ -31,6 +120,13 @@ export default function UserList({ filters, setFilters, setPage, roles, users, s
         if (!shouldDelete) return;
 
         await removeUser(userId);
+    }
+
+    async function handleResetPassword(item) {
+        const shouldReset = window.confirm(`Reset password untuk user ${item.name} (${item.email})? Password akan langsung diubah sekarang, lalu password baru dikirim via email.`);
+        if (!shouldReset) return;
+
+        await resetUserPassword(item.id);
     }
 
     const columns = [
@@ -61,16 +157,23 @@ export default function UserList({ filters, setFilters, setPage, roles, users, s
         },
         {
             name: 'Permission',
-            grow: 2,
+            width: '120px',
+            center: true,
             cell: (item) => (
-                <div className="chip-row compact-chip-row">
-                    {item.permissions.map((permission) => <span key={permission} className="chip">{permission}</span>)}
-                </div>
+                <button
+                    type="button"
+                    className="ghost-button perm-trigger"
+                    title={`Lihat ${item.permissions.length} permission`}
+                    onClick={() => setPermPopupUser(item)}
+                >
+                    <FiKey />
+                    <span className="perm-count">{item.permissions.length}</span>
+                </button>
             ),
         },
         {
             name: 'Aksi',
-            width: '220px',
+            width: '340px',
             cell: (item) => (
                 <div className="button-row compact table-actions">
                     <button type="button" className="ghost-button" disabled={!canEdit} onClick={() => setForm({
@@ -81,6 +184,11 @@ export default function UserList({ filters, setFilters, setPage, roles, users, s
                         role: item.roles[0] ?? roles[0] ?? '',
                         is_active: item.is_active,
                     })}><FiEdit2 /><span>Edit</span></button>
+                    {canResetPassword ? (
+                        <button type="button" className="ghost-button" onClick={() => handleResetPassword(item)}>
+                            <span>Reset Password</span>
+                        </button>
+                    ) : null}
                     <button type="button" className="danger-button" disabled={!canDelete || item.id === currentUserId} onClick={() => handleDeleteOne(item.id)}><FiTrash2 /><span>Hapus</span></button>
                 </div>
             ),
@@ -147,6 +255,8 @@ export default function UserList({ filters, setFilters, setPage, roles, users, s
                 clearSelectedRows={toggleClear}
                 progressPending={loading}
             />
+
+            {permPopupUser ? <PermissionPopup user={permPopupUser} onClose={() => setPermPopupUser(null)} /> : null}
         </article>
     );
 }

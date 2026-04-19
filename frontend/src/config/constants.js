@@ -1,8 +1,9 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000/api';
+//export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://banksoal.appsdraft.com/api';
 export const STORAGE_KEY = 'apps-soal-auth-token';
 
 export const NAV_ITEMS = [
-    { key: 'dashboard', label: 'Ikhtisar', permission: 'dashboard.view' },
+    { key: 'dashboard', label: 'Dashboard', permission: 'dashboard.view' },
     { key: 'subjects', label: 'Subject', permission: 'subjects.view' },
     { key: 'chapters', label: 'Bab & Sub Bab', permission: 'chapters.view' },
     { key: 'questions', label: 'Bank Soal', permission: 'questions.view' },

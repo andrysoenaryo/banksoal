@@ -15,6 +15,7 @@ use App\Http\Controllers\UserController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::get('/auth/forgot-password/confirm', [AuthController::class, 'confirmForgotPassword']);
+Route::get('/question-images/{path}', [QuestionController::class, 'image'])->where('path', '.*');
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/me', [AuthController::class, 'me']);

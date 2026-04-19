@@ -18,6 +18,25 @@ use PhpOffice\PhpWord\PhpWord;
 
 class QuestionController extends Controller
 {
+    public function image(string $path)
+    {
+        $normalizedPath = ltrim($path, '/');
+
+        if (str_contains($normalizedPath, '..')) {
+            abort(404, 'Gambar tidak ditemukan.');
+        }
+
+        $absolutePath = storage_path('app/public/'.$normalizedPath);
+
+        if (! is_file($absolutePath)) {
+            abort(404, 'Gambar tidak ditemukan.');
+        }
+
+        return response()->file($absolutePath, [
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $this->authorizePermission($request, 'questions.view');

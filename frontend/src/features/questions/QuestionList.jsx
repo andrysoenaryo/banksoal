@@ -3,7 +3,8 @@ import AppDataTable from '../../components/AppDataTable';
 import SearchableSelect from '../../components/SearchableSelect';
 import { DIFFICULTY_LEVELS, QUESTION_TYPES } from '../../config/constants';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
-import { createOption, createQuestionForm } from '../../utils/factories';
+import { createQuestionForm, normalizeMultipleChoiceOptions } from '../../utils/factories';
+import { resolveMediaUrl } from '../../utils/helpers';
 
 export default function QuestionList({
     filters,
@@ -54,7 +55,7 @@ export default function QuestionList({
             grow: 2.5,
             cell: (question) => (
                 <div>
-                    {question.question_image_url ? <img src={question.question_image_url} alt="Gambar soal" className="question-image-thumb" /> : null}
+                    {resolveMediaUrl(question.question_image_url) ? <img src={resolveMediaUrl(question.question_image_url)} alt="Gambar soal" className="question-image-thumb" /> : null}
                     <strong>{question.question_text}</strong>
                     <p className="table-note">Kunci: {question.answer_key}</p>
                     {question.options?.length ? (
@@ -113,14 +114,7 @@ export default function QuestionList({
                         explanation: question.explanation ?? '',
                         difficulty_level: question.difficulty_level,
                         points: question.points,
-                        options: question.options?.length
-                            ? question.options.map((option) => ({
-                                option_key: option.option_key,
-                                option_text: option.option_text,
-                                is_correct: option.is_correct,
-                                sort_order: option.sort_order,
-                            }))
-                            : [createOption(0), createOption(1), createOption(2), createOption(3)],
+                        options: normalizeMultipleChoiceOptions(question.options),
                         });
                     }}><FiEdit2 /><span>Edit</span></button>
                             <button type="button" className="danger-button" disabled={!canDelete} onClick={() => handleDeleteOne(question.id)}><FiTrash2 /><span>Hapus</span></button>

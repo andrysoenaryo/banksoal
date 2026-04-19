@@ -15,6 +15,7 @@ export default function UsersView({ client, user, onStatus, onError }) {
         users,
         removeUser,
         bulkRemoveUsers,
+        resetUserPassword,
         meta,
         setPerPage,
         sort,
@@ -25,6 +26,7 @@ export default function UsersView({ client, user, onStatus, onError }) {
     const canCreate = hasPermission(user, 'users.create');
     const canEdit = hasPermission(user, 'users.update');
     const canDelete = hasPermission(user, 'users.delete');
+    const canResetPassword = Array.isArray(user?.roles) && user.roles.includes('super-admin');
 
     return (
         <section className="panel-stack form-list-stack">
@@ -48,8 +50,10 @@ export default function UsersView({ client, user, onStatus, onError }) {
                 currentUserId={user.id}
                 removeUser={removeUser}
                 bulkRemoveUsers={bulkRemoveUsers}
+                resetUserPassword={resetUserPassword}
                 canEdit={canEdit}
                 canDelete={canDelete}
+                canResetPassword={canResetPassword}
                 meta={meta}
                 setPerPage={setPerPage}
                 sort={sort}

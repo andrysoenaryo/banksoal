@@ -1,5 +1,6 @@
 import { DIFFICULTY_LEVELS, QUESTION_IMAGE_UPLOAD, QUESTION_TYPES } from '../../config/constants';
 import SearchableSelect from '../../components/SearchableSelect';
+import { resolveMediaUrl } from '../../utils/helpers';
 
 export default function QuestionForm({
     form,
@@ -24,6 +25,8 @@ export default function QuestionForm({
     canEdit,
     canImport,
 }) {
+    const previewImageUrl = resolveMediaUrl(form.question_image_url);
+
     return (
         <article className="panel">
             <div className="panel-header">
@@ -118,9 +121,9 @@ export default function QuestionForm({
                         onChange={(event) => setQuestionImage(event.target.files?.[0] ?? null)}
                     />
                     {processingImage ? <small className="muted">Memproses crop/resize...</small> : null}
-                    {form.question_image_url ? (
+                    {previewImageUrl ? (
                         <div className="question-image-field-preview">
-                            <img src={form.question_image_url} alt="Preview gambar soal" className="question-image-preview" />
+                            <img src={previewImageUrl} alt="Preview gambar soal" className="question-image-preview" />
                             {form.question_image_meta ? (
                                 <p className="muted image-meta-text">
                                     Ukuran: {Math.round(form.question_image_meta.originalSize / 1024)}KB → {Math.round(form.question_image_meta.processedSize / 1024)}KB

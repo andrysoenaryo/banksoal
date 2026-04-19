@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FiBookOpen, FiBookmark, FiChevronRight, FiFileText, FiGrid, FiHome, FiLayers, FiLogOut, FiMenu, FiShield, FiUsers } from 'react-icons/fi';
+import ChangePasswordDialog from './components/ChangePasswordDialog';
 import LoginScreen from './components/LoginScreen';
 import { resolveFeatherIcon } from './config/featherIcons';
 import { STORAGE_KEY } from './config/constants';
@@ -70,7 +71,39 @@ function App() {
     const [checkingAuth, setCheckingAuth] = useState(Boolean(token));
     const [isMobileNav, setIsMobileNav] = useState(() => window.matchMedia('(max-width: 900px)').matches);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        current_password: '',
+        new_password: '',
+        new_password_confirmation: '',
+    });
+    const [passwordSubmitting, setPasswordSubmitting] = useState(false);
     const client = useMemo(() => buildClient(token), [token]);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const resetStatus = params.get('reset_password');
+
+        if (!resetStatus) {
+            return;
+        }
+
+        const resetMessage = params.get('reset_message');
+        const isSuccess = resetStatus === 'success';
+        const message = resetMessage
+            ?? (isSuccess
+                ? 'Konfirmasi reset password berhasil, silakan cek email anda.'
+                : 'Konfirmasi reset password gagal atau link tidak valid.');
+
+        localStorage.removeItem(STORAGE_KEY);
+        setToken('');
+        setUser(null);
+        setNavItems([]);
+        setStatus({ type: isSuccess ? 'success' : 'error', message });
+
+        const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+        window.history.replaceState({}, document.title, cleanUrl);
+    }, []);
 
     useEffect(() => {
         if (!status.message) {
@@ -229,6 +262,27 @@ function App() {
         setStatus({ type: 'success', message: 'Sesi telah diakhiri.' });
     }
 
+    async function handleChangePassword(event) {
+        event.preventDefault();
+
+        setPasswordSubmitting(true);
+
+        try {
+            await client.post('/me/change-password', passwordForm);
+            setStatus({ type: 'success', message: 'Password berhasil diperbarui.' });
+            setPasswordForm({
+                current_password: '',
+                new_password: '',
+                new_password_confirmation: '',
+            });
+            setIsPasswordDialogOpen(false);
+        } catch (error) {
+            handleError(error);
+        } finally {
+            setPasswordSubmitting(false);
+        }
+    }
+
     function handleError(error) {
         setStatus({ type: 'error', message: extractError(error) });
     }
@@ -349,21 +403,26 @@ function App() {
             {isMobileNav && isSidebarOpen ? <button type="button" className="mobile-backdrop" aria-label="Tutup sidebar" onClick={() => setIsSidebarOpen(false)} /> : null}
 
             <aside id="main-sidebar" className={`sidebar ${isMobileNav ? 'mobile' : ''} ${isSidebarOpen ? 'open' : ''}`}>
-                <div>
-                    <p className="shell-brand">Dashboard Guru</p>
-                    <p className="sidebar-copy">Kelola bank soal, jadwal, dan paket ujian dalam satu panel.</p>
-                </div>
+                <div className="sidebar-main">
+                    <div>
+                        <p className="shell-brand">Dashboard Guru</p>
+                        <p className="sidebar-copy">Kelola bank soal, jadwal, dan paket ujian dalam satu panel.</p>
+                    </div>
 
-                <div className="profile-card">
-                    <p className="profile-name">{user.name}</p>
-                    <p className="profile-email">{user.email}</p>
-                    <p className="profile-role">{user.roles.join(', ') || 'Tanpa role'}</p>
-                </div>
+                    <div className="profile-card">
+                        <p className="profile-name">{user.name}</p>
+                        <p className="profile-email">{user.email}</p>
+                        <p className="profile-role">{user.roles.join(', ') || 'Tanpa role'}</p>
+                        <button type="button" className="ghost-button" onClick={() => setIsPasswordDialogOpen(true)}>
+                            Ganti Password
+                        </button>
+                    </div>
 
-                <p className="sidebar-menu-title">Menu Navigasi</p>
-                <nav className="nav-grid">
-                    {renderNavItems(visibleNavItems)}
-                </nav>
+                    <p className="sidebar-menu-title">Menu Navigasi</p>
+                    <nav className="nav-grid">
+                        {renderNavItems(visibleNavItems)}
+                    </nav>
+                </div>
 
                 <button type="button" className="ghost-button sidebar-logout" onClick={handleLogout}>
                     <span className="nav-button-icon"><FiLogOut /></span>
@@ -402,6 +461,22 @@ function App() {
                 {activeView === 'roles' ? <RolesView client={client} user={user} onStatus={setStatus} onError={handleError} /> : null}
                 {activeView === 'menus' ? <MenusView client={client} user={user} onStatus={setStatus} onError={handleError} onNavigationChanged={reloadNavigation} /> : null}
             </main>
+
+            <ChangePasswordDialog
+                open={isPasswordDialogOpen}
+                form={passwordForm}
+                setForm={setPasswordForm}
+                onCancel={() => {
+                    setIsPasswordDialogOpen(false);
+                    setPasswordForm({
+                        current_password: '',
+                        new_password: '',
+                        new_password_confirmation: '',
+                    });
+                }}
+                onSubmit={handleChangePassword}
+                loading={passwordSubmitting}
+            />
         </div>
     );
 }

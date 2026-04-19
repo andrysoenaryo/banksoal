@@ -80,6 +80,15 @@ export default function useUsers({ client, onStatus, onError }) {
         }
     }
 
+    async function resetUserPassword(id) {
+        try {
+            await client.post(`/users/${id}/reset-password`);
+            onStatus({ type: 'success', message: 'Password user langsung di-reset dan notifikasi email dikirim.' });
+        } catch (error) {
+            onError(error);
+        }
+    }
+
     return {
         form,
         setForm,
@@ -91,6 +100,7 @@ export default function useUsers({ client, onStatus, onError }) {
         users,
         removeUser,
         bulkRemoveUsers,
+        resetUserPassword,
         meta,
         setPerPage,
         sort,

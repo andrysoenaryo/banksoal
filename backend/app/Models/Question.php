@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Question extends Model
 {
@@ -57,6 +56,6 @@ class Question extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->question_image_path);
+        return '/api/question-images/'.ltrim($this->question_image_path, '/');
     }
 }
