@@ -1268,9 +1268,21 @@ select:focus {
     flex: 0 0 auto;
 }
 
-.sidebar-logout {
-    justify-content: flex-start;
-    flex-shrink: 0;
+.nav-item-logout {
+    margin-top: 0.35rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.sidebar .nav-button.nav-logout-button {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.26);
+    color: #ffffff;
+}
+
+.sidebar .nav-button.nav-logout-button:hover {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.34);
 }
 
 .sidebar .nav-button.active {

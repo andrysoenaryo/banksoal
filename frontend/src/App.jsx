@@ -421,13 +421,14 @@ function App() {
                     <p className="sidebar-menu-title">Menu Navigasi</p>
                     <nav className="nav-grid">
                         {renderNavItems(visibleNavItems)}
+                        <div className="nav-item nav-item-logout">
+                            <button type="button" className="nav-button nav-logout-button" onClick={handleLogout}>
+                                <span className="nav-button-icon"><FiLogOut /></span>
+                                <span className="nav-button-label">Logout</span>
+                            </button>
+                        </div>
                     </nav>
                 </div>
-
-                <button type="button" className="ghost-button sidebar-logout" onClick={handleLogout}>
-                    <span className="nav-button-icon"><FiLogOut /></span>
-                    <span>Logout</span>
-                </button>
             </aside>
 
             <main className="content-area">
