@@ -13,9 +13,12 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::get('/auth/forgot-password/confirm', [AuthController::class, 'confirmForgotPassword']);
 
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/me/change-password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
@@ -33,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/questions/import-docx', [QuestionController::class, 'importDocx']);
     Route::apiResource('questions', QuestionController::class);
     Route::apiResource('roles', RoleController::class)->except(['show']);
+    Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword']);
     Route::apiResource('users', UserController::class);
     Route::get('/question-packages', [QuestionPackageController::class, 'index']);
     Route::post('/question-packages/generate', [QuestionPackageController::class, 'store']);

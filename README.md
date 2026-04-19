@@ -10,6 +10,8 @@ Proyek ini adalah aplikasi bank soal dengan fitur:
 - Preview hasil generate + edit detail paket soal
 - Export paket soal ke Excel/PDF/Word
 - Manajemen user dan role/permission
+- Change password untuk semua user (hanya akun login sendiri)
+- Reset password user oleh super-admin + notifikasi email ke user dan admin/super-admin
 - Manajemen menu navigasi (CRUD + drag & drop parent/child)
 - Pagination + filter detail pada seluruh tabel frontend
 - Isolasi data per user login (subject, bab, soal, paket)
@@ -39,6 +41,7 @@ Riwayat perubahan versi tersedia di file `CHANGELOG.md`.
 - `POST /api/login`
 - `POST /api/logout`
 - `GET /api/me`
+- `POST /api/me/change-password`
 - `GET /api/dashboard`
 - `GET /api/menus/navigation`
 - `GET /api/menus/tree`
@@ -54,6 +57,7 @@ Riwayat perubahan versi tersedia di file `CHANGELOG.md`.
 - `POST /api/questions/import-docx`
 - `apiResource /api/roles` (tanpa show)
 - `apiResource /api/users`
+- `POST /api/users/{user}/reset-password` (khusus super-admin)
 - `GET /api/question-packages`
 - `POST /api/question-packages/generate`
 - `GET /api/question-packages/{questionPackage}`
@@ -89,6 +93,8 @@ SPA sudah mencakup:
 - Export PDF/Word dengan pilihan "dengan kunci jawaban" atau "tanpa kunci jawaban"
 - Import soal Excel dan Word DOCX
 - Manajemen user dan role permission
+- Change password (untuk semua role, hanya akun login sendiri)
+- Reset password user dari daftar user (khusus super-admin)
 - Manajemen menu (super-admin)
 - Pagination + filter per modul data
 

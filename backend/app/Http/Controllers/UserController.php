@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UserPasswordResetMail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
@@ -115,6 +118,63 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'User berhasil dihapus.',
+        ]);
+    }
+
+    public function resetPassword(Request $request, User $user): JsonResponse
+    {
+        $actor = $request->user();
+
+        if (! $actor) {
+            abort(401, 'Unauthenticated.');
+        }
+
+        abort_unless($actor->hasRole('super-admin'), 403, 'Akses ditolak. Hanya super-admin yang dapat reset password user.');
+
+        if (! filled($user->email)) {
+            return response()->json([
+                'message' => 'Email user kosong, reset password tidak dapat dikirim.',
+            ], 422);
+        }
+
+        $temporaryPassword = Str::password(12, true, true, false, false);
+
+        $user->forceFill([
+            'password' => Hash::make($temporaryPassword),
+        ])->save();
+
+        // Invalidate all previous tokens so user must login with the new password.
+        $user->tokens()->delete();
+
+        $adminEmails = User::query()
+            ->where('is_active', true)
+            ->whereHas('roles', fn ($query) => $query->whereIn('name', ['super-admin', 'admin-bank-soal']))
+            ->pluck('email')
+            ->filter(fn ($email) => filled($email))
+            ->unique()
+            ->values()
+            ->all();
+
+        Mail::to($user->email)->send(new UserPasswordResetMail(
+            targetUserName: $user->name,
+            targetUserEmail: $user->email,
+            temporaryPassword: $temporaryPassword,
+            resetByName: $actor->name,
+            audienceLabel: 'user'
+        ));
+
+        if (! empty($adminEmails)) {
+            Mail::to($adminEmails)->send(new UserPasswordResetMail(
+                targetUserName: $user->name,
+                targetUserEmail: $user->email,
+                temporaryPassword: $temporaryPassword,
+                resetByName: $actor->name,
+                audienceLabel: 'admin'
+            ));
+        }
+
+        return response()->json([
+            'message' => 'Password user langsung di-reset saat ini dan notifikasi email telah dikirim.',
         ]);
     }
 
