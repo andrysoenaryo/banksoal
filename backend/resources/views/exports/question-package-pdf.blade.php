@@ -7,8 +7,8 @@
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1e293b; }
         h1 { font-size: 16px; margin-bottom: 4px; }
         h2 { font-size: 13px; margin-top: 16px; margin-bottom: 7px; }
-        .meta p { margin: 0 0 4px; }
-        .question { border: 1px solid #cbd5e1; border-radius: 6px; padding: 9px; margin-bottom: 9px; }
+        .meta p { margin: 0 0 4px; align-content: center; }
+        .question { padding: 9px; margin-bottom: 9px; }
         .question-title { font-weight: 700; margin-bottom: 6px; }
         ul { margin: 5px 0 5px 16px; }
     </style>
@@ -21,7 +21,6 @@
         @endif
     </div>
 
-    <h2>Daftar Soal</h2>
     @foreach($package->items as $index => $item)
         @php $question = $item->question; @endphp
         @if($question)

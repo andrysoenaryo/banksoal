@@ -1,3 +1,19 @@
+@media (max-width: 600px) {
+    .button-row.compact {
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+    .button-row.compact button {
+        width: fit-content;
+        min-width: 0;
+        padding: 0.4rem 0.7rem !important;
+        font-size: 0.95em;
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: unset;
+        justify-content: center;
+    }
+}
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {

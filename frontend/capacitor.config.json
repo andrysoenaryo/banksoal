@@ -1,0 +1,9 @@
+{
+  "appId": "banksoal.appsdraft.com",
+  "appName": "bank-soal-digital",
+  "webDir": "dist",
+  "server": {
+    "url": "https://banksoal.appsdraft.com/",
+    "cleartext": true
+  }
+}
